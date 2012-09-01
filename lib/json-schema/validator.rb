@@ -185,53 +185,8 @@ module JSON
     end
 
 
-    def load_ref_schema(parent_schema,ref)
-      uri = URI.parse(ref)
-      if uri.relative?
-        uri = parent_schema.uri.clone
-
-        # Check for absolute path
-        path = ref.split("#")[0]
-
-        # This is a self reference and thus the schema does not need to be re-loaded
-        if path.nil? || path == ''
-          return
-        end
-
-        if path && path[0,1] == '/'
-          uri.path = Pathname.new(path).cleanpath.to_s
-        else
-          uri = parent_schema.uri.merge(path)
-        end
-        uri.fragment = ''
-      end
-
-      if Validator.schemas[uri.to_s].nil?
-        begin
-          schema = JSON::Schema.new(JSON::Validator.parse(open(uri.to_s).read), uri, @options[:version])
-          Validator.add_schema(schema)
-          build_schemas(schema)
-        rescue JSON::ParserError
-          # Don't rescue this error, we want JSON formatting issues to bubble up
-          raise $!
-        rescue Exception
-          # Failures will occur when this URI cannot be referenced yet. Don't worry about it,
-          # the proper error will fall out if the ref isn't ever defined
-        end
-      end
-    end
-
-
     # Build all schemas with IDs, mapping out the namespace
     def build_schemas(parent_schema)
-      # Build ref schemas if they exist
-      if parent_schema.schema["$ref"]
-        load_ref_schema(parent_schema, parent_schema.schema["$ref"])
-      end
-      if parent_schema.schema["extends"] && parent_schema.schema["extends"].is_a?(String)
-        load_ref_schema(parent_schema, parent_schema.schema["extends"])
-      end
-
       # Check for schemas in union types
       ["type", "disallow"].each do |key|
         if parent_schema.schema[key] && parent_schema.schema[key].is_a?(Array)
