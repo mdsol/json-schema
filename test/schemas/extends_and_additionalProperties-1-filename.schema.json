@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-03/schema#",
   "type": "object",
-  "extends": "inner.schema.json",
+  "extends": "https://raw.github.com/hoxworth/json-schema/master/test/schemas/inner.schema.json",
   "properties": {
     "outerA": {
       "description": "blah",
@@ -20,7 +20,7 @@
       "minItems": 1,
       "maxItems": 50,
       "items": {
-        "extends": "inner.schema.json",
+        "extends": "https://raw.github.com/hoxworth/json-schema/master/test/schemas/inner.schema.json",
         "additionalProperties": false
       }
     },
