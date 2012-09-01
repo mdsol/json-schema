@@ -19,31 +19,27 @@ class ExtendsNestedTest < Test::Unit::TestCase
     extends_and_additionalProperties-2-filename extends_and_additionalProperties-2-ref
   ].each do |schema_name|
     test_prefix= 'test_' + schema_name.gsub('-','_')
-    class_eval <<-EOB
 
-      def #{test_prefix}_valid_outer
-        assert_valid '#{schema_name}', {"outerC"=>true}, "Outer defn is broken, maybe the outer extends overrode it?"
-      end
+    define_method("#{test_prefix}_valid_outer") do
+      assert_valid schema_name, {"outerC"=>true}, "Outer defn is broken, maybe the outer extends overrode it?"
+    end
 
-      def #{test_prefix}_valid_outer_extended
-        assert_valid '#{schema_name}', {"innerA"=>true}, "Extends at the root level isn't working."
-      end
+    define_method("#{test_prefix}_valid_outer_extended") do
+      assert_valid schema_name, {"innerA"=>true}, "Extends at the root level isn't working."
+    end
 
-      def #{test_prefix}_valid_inner
-        assert_valid '#{schema_name}', {"outerB"=>[{"innerA"=>true}]}, "Extends isn't working in the array element defn."
-      end
+    define_method("#{test_prefix}_valid_inner") do
+      assert_valid schema_name, {"outerB"=>[{"innerA"=>true}]}, "Extends isn't working in the array element defn."
+    end
 
-      def #{test_prefix}_invalid_inner
-        refute_valid '#{schema_name}', {"outerB"=>[{"whaaaaat"=>true}]}, "Array element defn allowing anything when it should only allow what's in inner.schema"
-      end
-    EOB
+    define_method("#{test_prefix}_invalid_inner") do
+      refute_valid schema_name, {"outerB"=>[{"whaaaaat"=>true}]}, "Array element defn allowing anything when it should only allow what's in inner.schema"
+    end
 
     if schema_name['extends_and_additionalProperties-1']
-      class_eval <<-EOB
-        def #{test_prefix}_invalid_outer
-          refute_valid '#{schema_name}', {"whaaaaat"=>true}, "Outer defn allowing anything when it shouldn't."
-        end
-      EOB
+      define_method("#{test_prefix}_invalid_outer") do
+        refute_valid schema_name, {"whaaaaat"=>true}, "Outer defn allowing anything when it shouldn't."
+      end
     end
 
   end
